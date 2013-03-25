@@ -23,20 +23,23 @@
     :mtime (list (new Date (.lastModified file))) 
     :stime (list (new Date))})
 
+(defn get-fieldcontent [fieldkey]
+  (if-not (or (. fieldkey isEmpty)
+              (. fieldkey isBinary)) 
+     (. fieldkey getContent)))
+
 (defn tags [file]
  "Return an AudioFile's tags." 
   (if-let  [tag  (. file (getTag))]
     (apply conj {}
            (filter (fn [[k v]] (and v (not (empty? v))))
                    (map (fn [[k v]] 
-                          [k (seq (map (fn [fieldkey]
-                                         (if-not (or
-                                                   (. fieldkey isEmpty)
-                                                   (. fieldkey isBinary))
-                                         (. fieldkey getContent)))
-                                       (. tag (getFields v))))])
+                          [k (seq (map get-fieldcontent (. tag (getFields v))))])
                         (fields))))))
 
-(defn make-audiofile [file]
-  (let  [audiofile (AudioFileIO/read file)]
-    (conj (metadata file) (headers audiofile) (tags audiofile))))
+(defn create-audiofile [file]
+  (let  [audiofile (AudioFileIO/read file)
+         data      (merge {} (metadata file) (headers audiofile) (tags audiofile))]
+    (apply conj {}
+           (filter (fn [[k v]] (not (class? v)))
+                   (map #(if (seq? %) (first %) %) data)))))
