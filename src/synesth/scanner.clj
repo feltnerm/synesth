@@ -6,8 +6,8 @@
   (:import [org.jaudiotagger.audio SupportedFileFormat]
            [java.util.concurrent Executors]
            )
-  (:require [synesth.util] 
-            [synesth.audiofile]))
+  (:require [synesth.util :as util] 
+            [synesth.audiofile :as audiofile]))
 
 (defn file-formats []
   "Return a list of valid AudioFile suffixes."
@@ -23,5 +23,5 @@
 
 (defn scan [path]
   "List of all the files in path."
-   (map synesth.audiofile/make-audiofile 
-        (synesth.util/walk-pred is-audio-file path)))
+   (map audiofile/create-audiofile 
+        (util/walk-pred is-audio-file path)))
