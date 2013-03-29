@@ -3,11 +3,10 @@
 ;; generate a list of AudioFiles from a path.
 
 (ns synesth.scanner
-  (:import [org.jaudiotagger.audio SupportedFileFormat]
-           [java.util.concurrent Executors]
-           )
+  (:import [org.jaudiotagger.audio SupportedFileFormat])
   (:require [synesth.util :as util] 
-            [synesth.audiofile :as audiofile]))
+            [synesth.audiofile :as audiofile]
+            [synesth.database :as database]))
 
 (defn file-formats []
   "Return a list of valid AudioFile suffixes."
@@ -25,3 +24,8 @@
   "List of all the files in path."
    (map audiofile/create-audiofile 
         (util/walk-pred is-audio-file path)))
+
+(defn importer [path]
+  "Import AudioFiles found in `path` to database."
+  (if (.exists (clojure.java.io/file path))
+    (map database/insert-audiofile (scan path))))
