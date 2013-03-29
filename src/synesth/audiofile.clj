@@ -2,15 +2,9 @@
 ;; Represents an audiofile and the operations that are performed on one.
 
 (ns synesth.audiofile
+  (:require [synesth.util :as util])
   (:import  (java.util Date)
-            (org.jaudiotagger.audio AudioFileIO)
-            (org.jaudiotagger.tag FieldKey)))
-
-(defn fields []
-  "Return a hashmap of valid AudioFile fields."
-  (apply conj {} 
-         (map (fn [n] [(keyword (. (. n toString) toLowerCase)) n]) 
-              (. FieldKey values))))
+            (org.jaudiotagger.audio AudioFileIO)))
 
 ;; AudioFile manipulation
 (defn headers [file]
@@ -19,14 +13,22 @@
 
 (defn metadata [file]
   "File metadata"
-  {:path (list (. file (getAbsolutePath)))
-    :mtime (list (new Date (.lastModified file))) 
-    :stime (list (new Date))})
+  {:path (. file (getAbsolutePath))
+   :mtime (new Date (.lastModified file)) 
+   :stime (new Date)})
 
 (defn get-fieldcontent [fieldkey]
-  (if-not (or (. fieldkey isEmpty)
-              (. fieldkey isBinary)) 
-     (. fieldkey getContent)))
+  (if-not (or (. fieldkey isEmpty) (. fieldkey isBinary))
+    (let [content (. fieldkey getContent)]
+      (if (and (sequential? content) (= 1 (count content)))
+       (first content)
+       content))))
+
+(defn get-field [tag v]
+  (let  [fieldcontent (map get-fieldcontent (. tag (getFields v)))]
+    (if (= 1 (count fieldcontent))
+      (first fieldcontent)
+      (seq fieldcontent))))
 
 (defn tags [file]
  "Return an AudioFile's tags." 
@@ -34,8 +36,8 @@
     (apply conj {}
            (filter (fn [[k v]] (and v (not (empty? v))))
                    (map (fn [[k v]] 
-                          [k (seq (map get-fieldcontent (. tag (getFields v))))])
-                        (fields))))))
+                          [k (get-field tag v)])
+                        (util/fields))))))
 
 (defn create-audiofile [file]
   (let  [audiofile (AudioFileIO/read file)
