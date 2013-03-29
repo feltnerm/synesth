@@ -1,6 +1,6 @@
 ;; util.clj
 (ns synesth.util
- (:import (org.jaudiotagger.tag FieldKey)))
+  (:import (org.jaudiotagger.tag FieldKey)))
 
 ;; JAudioTagger utilities
 (defn fields []
