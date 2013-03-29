@@ -7,14 +7,13 @@ A Clojure library designed to assist with cataloging, sharing, and storing your 
 Since, synesth is under heavy development, this is subject to change.
 
 ```bash
-synesth "/home/mark/music"
+synesth [options] [command [args...]]
 ```
 
 ## Upcoming Features
-* Database support + simply query language
 * RESTful API
-* Tagging / importing support
-* Streams / Downloads
+* Tagging Support
+* Streaming / Downloading / Link Sharing
 
 ## License
 
