@@ -9,36 +9,38 @@
 
 (defn parse-cli [opts]
   "Parse a list of command-line arguments into a hash of argument keys and 
-values, a list of following options, and the help banner for this program."
+  values, a list of following options, and the help banner for this program."
   (cli opts 
        ["-h" "--help" "Show help" :default false :flag true]
        ["-v" "--[no-]verbose" "Verbosity" :default false :flag true]
-       ["-c" "--config" "Path to configuration file." :default "./resources/default.config"]
-    ))
+       ["-c" "--config" "Path to configuration file." 
+        :default "./resources/default.config"]))
 
 (defn parse-command [args]
   "Parse the arguments following the command line options.
-  Syntax: <command> [<options>]"
+ Syntax: <command> [<options>]"
   [(first args) (rest args)])
 
+(defn initialize-synesth [settings]
+  (synesth.database/init-db 
+    (:mongodb_database  (:database settings))
+    (:mongodb_hostname  (:database settings))
+    (:mongodb_port      (:database settings))))
 
 (defn -main 
   "Main entry point for the synesth application."
   [& opts]
-  (let  [default-settings   (config/load-config "./resources/default.config") 
-         [opts args banner] (parse-cli opts)]
+  (let  [[opts args banner] (parse-cli opts)]
     (when (:help opts)
       (println banner)
       (System/exit 0)) 
     (when args
-      (let   [settings       (merge {} default-settings (config/load-config (:config opts)))
-              [command args] (parse-command args)
-              plugin         (first (filter #(= (clojure.string/lower-case command) 
-                                                (clojure.string/lower-case (:name %)))
-                                           (plugins/load-defaults)))]
-        (synesth.database/init-db 
-          (:mongodb_database (:database settings))
-          (:mongodb_hostname  (:database settings))
-          (:mongodb_port    (:database settings)))
+      (let   [[command args]  (parse-command args)
+              plugin          (plugins/find-plugin command)
+              settings        (merge {} 
+                                     (config/load-config "./resources/default.config") 
+                                     (config/load-config (:config opts)))]
+        (initialize-synesth settings)
         (if plugin
-          (apply (:command plugin) args))))))
+          (do
+            (apply (:command plugin) args)))))))

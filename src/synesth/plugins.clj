@@ -16,3 +16,8 @@
 
 (defn load-defaults []
   (map load-plugin (default-plugins)))
+
+(defn find-plugin [plugin-name]
+  (first (filter #(= (clojure.string/lower-case plugin-name) 
+                     (clojure.string/lower-case (:name %)))
+                 (load-defaults))))

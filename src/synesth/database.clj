@@ -6,9 +6,10 @@
   (:require [synesth.util :as util]))
 
 ;; Lower-level database functions
-;; @TODO: Connect to other databases
 (defn init-db  [dbname host port]
+  "Call from -main to init the database connection macro below:"
  (def conn
+   "Macro that connects to the database. @todo: does this handle disconnects?"
   (db/make-connection dbname
                       :host host 
                       :port port)))
@@ -43,10 +44,10 @@ query provided in the hash-map `fields."
 
 (defn is-unique [& {:keys [path artist title]}]
   (not (< 0 (by-fields  {:$or [
-                                  {:path  path}
-                                  {:$and [
-                                          {:artist  artist}
-                                          {:title   title }]}]} 
+                                {:path  path}
+                                {:$and [
+                                        {:artist  artist}
+                                        {:title   title }]}]} 
                           :count? true))))
 
 (defn insert-audiofile [data] 
