@@ -6,8 +6,8 @@ A Clojure library designed to assist with cataloging, sharing, and storing your 
 
 Since, synesth is under heavy development, this is subject to change.
 
-```bash
-synesth [options] [command [args...]]
+```sh
+synesth [OPTIONS] [COMMAND [ARGS...]]
 ```
 
 ## Upcoming Features
