@@ -7,10 +7,12 @@
 
 ;; Lower-level database functions
 ;; @TODO: Connect to other databases
-(def conn
-  (db/make-connection "synesth-dev-db"
-                      :host "127.0.0.1"
-                      :port 27017))
+(defn init-db  [dbname host port]
+ (def conn
+  (db/make-connection dbname
+                      :host host 
+                      :port port)))
+
 
 (defn drop-collections [& colls]
   "Drop all the collections."
